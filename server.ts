@@ -14,9 +14,6 @@ import {
 } from './src/lib/seed-data';
 import { Order, OptimizationWeights } from './src/types/logistics';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
 // In-memory backend database state
 let dbOrders = [...SEED_ORDERS];
 let dbVehicles = [...SEED_VEHICLES];
@@ -28,7 +25,7 @@ let dbWeights: OptimizationWeights = { ...DEFAULT_OPTIMIZATION_WEIGHTS };
 
 async function startServer() {
   const app = express();
-  const PORT = 3000;
+  const PORT = process.env.PORT || 3000;
 
   app.use(express.json());
 
@@ -137,7 +134,13 @@ async function startServer() {
         return res.status(400).json({ error: 'Vehicle or Driver not found for assignment' });
       }
 
-      const routes = await RoutingService.calculateRoutes(order.sender.location, order.recipient.location);
+      const routes = await RoutingService.calculateRoutes(
+        order.sender.location,
+        order.recipient.location,
+        1.0,
+        undefined,
+        process.env.TOMTOM_API_KEY
+      );
       const bestRoute = routes.find((r) => r.isRecommended) || routes[0];
 
       order.status = 'assigned';
@@ -181,7 +184,13 @@ async function startServer() {
       if (!origin || !destination) {
         return res.status(400).json({ error: 'Origin and Destination required' });
       }
-      const routes = await RoutingService.calculateRoutes(origin, destination, trafficMultiplier || 1.0);
+      const routes = await RoutingService.calculateRoutes(
+        origin,
+        destination,
+        trafficMultiplier || 1.0,
+        undefined,
+        process.env.TOMTOM_API_KEY
+      );
       res.json(routes);
     } catch (err: any) {
       res.status(500).json({ error: err.message });
