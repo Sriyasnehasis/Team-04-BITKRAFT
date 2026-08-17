@@ -1,0 +1,6 @@
+{
+  "name": "LogiRoute OS - Intelligent Route Optimization & Delivery Simulation",
+  "description": "Full-stack intelligent logistics operating system featuring multi-criteria route optimization, live vehicle simulation, dynamic rerouting, breakdown recovery, conflict detection, and enterprise fleet analytics.",
+  "requestFramePermissions": ["geolocation"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
