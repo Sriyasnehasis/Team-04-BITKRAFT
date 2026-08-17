@@ -1,10 +1,10 @@
 # LogiRoute OS 🚚💨
 ### Intelligent Route Optimization & Simulation Engine
 
-[![Vercel Deployment](https://img.shields.io/badge/Vercel-Live_Site-blueviolet?style=for-the-badge&logo=vercel)](https://team-04-bitkraft.vercel.app/)
-[![Render Backend](https://img.shields.io/badge/Render-Backend_API-brightgreen?style=for-the-badge&logo=render)](https://dashboard.render.com/)
-[![Built with React](https://img.shields.io/badge/Built_with-React_19-blue?style=for-the-badge&logo=react)](https://react.dev/)
-[![Routing Engine](https://img.shields.io/badge/Routing-TomTom_API-orange?style=for-the-badge&logo=tomtom)](https://developer.tomtom.com/)
+[![Vercel Deployment](https://img.shields.io/badge/Vercel-Live_Site-0F172A?style=for-the-badge&logo=vercel)](https://team-04-bitkraft.vercel.app/)
+[![Render Backend](https://img.shields.io/badge/Render-Backend_API-2563EB?style=for-the-badge&logo=render)](https://dashboard.render.com/)
+[![Built with React](https://img.shields.io/badge/Built_with-React_19-0284C7?style=for-the-badge&logo=react)](https://react.dev/)
+[![Routing Engine](https://img.shields.io/badge/Routing-TomTom_API-0D9488?style=for-the-badge&logo=tomtom)](https://developer.tomtom.com/)
 
 LogiRoute OS is a next-generation real-time route optimization platform and simulation sandbox. Designed for modern logistics operators and dispatchers, it solves the "last-mile routing problem" dynamically by balancing **Travel Duration, Physical Distance, and Operational Costs** based on order priorities.
 
