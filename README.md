@@ -1,70 +1,106 @@
 # LogiRoute OS 🚚💨
 ### Intelligent Route Optimization & Simulation Engine
 
-LogiRoute OS is a real-time routing optimization dashboard and simulation sandbox designed for modern logistics operators and customers. It uses priority-based scoring heuristics, real-world mapping, and API fallback algorithms to maximize fleet utilization, minimize travel times, and resolve transit incidents dynamically.
+[![Vercel Deployment](https://img.shields.io/badge/Vercel-Live_Site-blueviolet?style=for-the-badge&logo=vercel)](https://team-04-bitkraft.vercel.app/)
+[![Render Backend](https://img.shields.io/badge/Render-Backend_API-brightgreen?style=for-the-badge&logo=render)](https://dashboard.render.com/)
+[![Built with React](https://img.shields.io/badge/Built_with-React_19-blue?style=for-the-badge&logo=react)](https://react.dev/)
+[![Routing Engine](https://img.shields.io/badge/Routing-TomTom_API-orange?style=for-the-badge&logo=tomtom)](https://developer.tomtom.com/)
+
+LogiRoute OS is a next-generation real-time route optimization platform and simulation sandbox. Designed for modern logistics operators and dispatchers, it solves the "last-mile routing problem" dynamically by balancing **Travel Duration, Physical Distance, and Operational Costs** based on order priorities.
 
 ---
 
-## 🎯 1. Evaluation & Judging Criteria Alignment
+## 🗺️ 1. Architecture Flow & Visualizations
+
+### 🖥️ High-Level System Architecture
+The application runs as a unified monorepo. It features a React 19 Frontend communicating with an in-memory state engine, which connects to either the TomTom API or a high-fidelity local grid geometry fallback:
+
+```mermaid
+graph TD
+    User([Logistics Operator / Customer]) -->|Interacts with UI| React[React 19 SPA Client]
+    React -->|Subscribes & Triggers Actions| Store[In-Memory Logistics Store]
+    
+    subgraph Core Engine
+        Store -->|Evaluate Driver & Vehicle| OptEngine[Optimization Engine]
+        Store -->|Calculate Alternatives| RouteEngine[Routing Engine]
+    end
+
+    subgraph API & Geometries
+        RouteEngine -->|Check Credentials| TomTom{TomTom API Key?}
+        TomTom -->|Provided| TomTomAPI[TomTom Route API]
+        TomTom -->|None / Empty| FallbackGrid[High-Fidelity Synthetic Grid]
+    end
+
+    Store -->|Active Telemetry Coordinates| Map[Leaflet Live Map Overlay]
+    Store -->|Real-time update loop| Sim[Live Simulation Thread]
+    Sim -->|Updates position & traffic| React
+```
+
+### 🧮 Multi-Criteria Score Calculation Flow
+When optimization is requested for an order, the system scores every available driver-vehicle candidate based on the order's `DeliveryPriority`:
+
+```mermaid
+graph LR
+    Order[Order Priority] -->|Express / Same Day| TimeWeight[Prioritize Time: w_time = 80%]
+    Order -->|Standard Delivery| DistWeight[Prioritize Distance/Cost: w_dist = 80%]
+    
+    TimeWeight --> ScoreCalc
+    DistWeight --> ScoreCalc
+    
+    subgraph Score Calculation
+        ScoreCalc["Score = (w_time * S_time) + (w_dist * S_dist) + (w_cost * S_cost)"]
+    end
+    
+    ScoreCalc --> Output[Recommended Candidate List]
+```
+
+---
+
+## 🎯 2. Evaluation & Judging Criteria Alignment
 
 ### 📋 Problem Understanding & Agent Scope
-* **The Problem**: Traditional logistics dispatching relies on manual vehicle assignments, static routes, and slow responses to transit incidents (e.g., breakdown, traffic delays).
-* **Our Solution**: LogiRoute OS automates dispatching using multi-criteria optimization weights (Time, Distance, and Cost) to match incoming orders with the optimal vehicle and driver.
-* **Agent Scope**: The agent assists in:
-  1. Integrating third-party APIs (TomTom Routing & Traffic APIs).
-  2. Modifying scoring weights depending on order delivery priority.
-  3. Orchestrating UI adjustments (Leaflet modal layering, interactive dashboard states).
-  4. Setting up fallbacks to ensure zero-downtime offline execution.
+* **The Problem**: Dispatches are usually handled manually, leading to poor route choices, high carbon emissions, delayed ETAs, and high driver idle times.
+* **Our Solution**: LogiRoute OS dynamically pairs pending orders with nearby active fleets using complex multi-criteria heuristics.
+* **Agent Scope**: The Antigravity AI Agent is configured to assist in:
+  1. Integrating third-party APIs (TomTom Route & Live Traffic APIs) asynchronously.
+  2. Modifying scoring algorithms based on priorities.
+  3. Organizing CSS layering (e.g. Leaflet map `z-0` vs modal dialog panels `z-[9999]`).
+  4. Setting up robust, zero-downtime offline fallbacks.
 
 ### 🤖 Agent Specification Files & Configurations
-Custom agent configuration guidelines are embedded in the workspace:
-* [**`.agents/GEMINI.md`**](file:///.agents/GEMINI.md): Defines repo context, styling, and coding constraints.
-* [**`.agents/skills/logiroute-engine/SKILL.md`**](file:///.agents/skills/logiroute-engine/SKILL.md): Details the route evaluation algorithms and API integration standards.
+To enable seamless development and let other developers or AI agents safely build on top of this engine, we have embedded custom agent guidelines inside the `.agents/` folder:
+* [**`.agents/GEMINI.md`**](file:///.agents/GEMINI.md): Outlines coding guidelines, Tailwind rules, Leaflet overlay z-index restrictions, and TypeScript expectations.
+* [**`.agents/skills/logiroute-engine/SKILL.md`**](file:///.agents/skills/logiroute-engine/SKILL.md): Details formula weights, TomTom coordinate sub-sampling logic, and how to verify mock engine fallbacks.
 
 ### 🔄 Prompting & Iteration Process
-Development followed a rigorous iterative feedback loop:
-1. **API Integration**: Connected the TomTom Routing API with asynchronous fetching, adding a secure settings panel that persists credentials.
-2. **Dynamic UI Improvements**: Resolved a critical z-index layering bug where Leaflet's maps bled through input dialogs. Fixed styling bugs using strict Tailwind classes.
-3. **TypeScript Alignment**: Ensured clean compilation using strict types across frontend stores and Express endpoints (`tsc --noEmit` exits with status `0`).
+Development was performed iteratively, tracking bug fixes and enhancements step-by-step:
+1. **API Integration Phase**: Connected TomTom API asynchronously. Designed persistent client storage for keys to prevent exposure in commits.
+2. **UI & Layout Stabilization**: Fixed a rendering collision where Leaflet maps bled through interactive modals. Cleaned CSS using strict utility-first layouts.
+3. **CommonJS & ESM Bundling Correction**: Resolved a critical bundler crash where `import.meta.url` was compiled to an unsupported output format under esbuild, resulting in a server launch failure on Render. Cleaned the code to rely on robust, safe path loaders.
 
 ### ⚡ Agent Behavior Limitations & Output Quality
-* **In-Memory Limits**: The Express backend uses in-memory states; restarting the container restores seed configurations.
+* **State Persistence Limit**: All data is stateful in-memory. Container restarts or hard reloads reset the demo scenario back to default seeds.
 * **API Rate Limits**: The TomTom routing engine sub-samples coordinate points. If the API key is absent, the system instantly switches to a high-fidelity synthetic city grid generator to ensure continuous runtime.
-* **Output Quality**: Validated with complete TypeScript compiling. Fully responsive viewport dashboard.
+* **TypeScript Integrity**: Verified by running `npm run lint` (`tsc --noEmit`), exiting with status `0`.
 
 ---
 
-## 🚀 2. Deployment Instructions
+## 🚀 3. Live Deployments
 
-LogiRoute OS is structured as a unified monorepo. The backend Express server runs Vite as a middleware in development, and serves static files directly in production.
+### ⚡ Frontend Static Deployment (Vercel)
+* **Live Link**: [https://team-04-bitkraft.vercel.app/](https://team-04-bitkraft.vercel.app/)
+* **Build Settings**: Vite application preset. Builds using `npm run build` and exports the static `dist/` directory.
 
-### 🌐 Option A: Unified Deployment on Render (Recommended)
-This hosts both the **Express Backend API** and the **Vite Frontend Client** on a single persistent service.
-
-1. **Sign Up/Log In**: Go to [Render](https://render.com).
-2. **Create Web Service**: Connect your GitHub repository.
-3. **Configure Service settings**:
-   * **Runtime**: `Node`
-   * **Build Command**: `npm install && npm run build`
-   * **Start Command**: `npm start`
-4. **Environment Variables**:
-   * Add `NODE_ENV = production`
-   * (Optional) `PORT = 10000` (Render binds this automatically)
-5. Click **Deploy**. Render will host the application and provide a public URL.
-
-### ⚡ Option B: Frontend Static Deployment on Vercel
-Since the frontend uses a client-side store (`src/lib/store.ts`) that runs routing/optimization algorithms directly in the browser, you can host the frontend client alone as a zero-cost static site on Vercel.
-
-1. **Install Vercel CLI** or connect your Git repo to [Vercel](https://vercel.com).
-2. **Build Settings**:
-   * **Framework Preset**: `Vite`
-   * **Build Command**: `npm run build` (runs `vite build`)
-   * **Output Directory**: `dist`
-3. Click **Deploy**. Vercel will serve your app statically.
+### 🌐 Unified API Backend & Frontend Deployment (Render)
+* **Build Command**: `npm install && npm run build`
+* **Start Command**: `npm start` (Runs `node dist/server.cjs`)
+* **Environment Variables**:
+  * `NODE_ENV` = `production`
+  * `TOMTOM_API_KEY` = `dV3Tq3qAYr9qOCtHUISX27pZgRZvW5gw` (Optional: configure on Render to sync backend computations)
 
 ---
 
-## 🛠️ 3. Local Development & Demo Setup
+## 🛠️ 4. Local Development & Demo Setup
 
 ### Installation
 1. Clone the repository and navigate to the directory:
@@ -82,7 +118,7 @@ Since the frontend uses a client-side store (`src/lib/store.ts`) that runs routi
    ```
 4. Open your browser and navigate to `http://localhost:3000`.
 
-### ⚙️ Demo Walks
-1. **Toggle Roles**: Switch between **Operator Dashboard** (Dispatch, Fleet, Incidents) and **Customer Portal** (Track Active Packages, view ETA).
-2. **TomTom API Key Configuration**: Click ⚙️ in the top bar to open **Optimization Settings**, enter your TomTom API Key to query real-world coordinates, or leave blank to test the fallback grid engine.
-3. **Dispatch Simulation**: Create an order, run candidate optimization scoring, assign a vehicle, and view the animated delivery simulation live on the Leaflet map!
+### ⚙️ Demo Walkthrough
+1. **Change User Roles**: Switch roles in the navigation bar to see the **Operator Dashboard** or the **Customer Portal**.
+2. **Adjust Optimization Settings**: Click the ⚙️ gear icon in the navigation bar. Adjust the weights for Time, Distance, and Cost, then click save.
+3. **Dispatch & Simulation**: Click on a pending order, run the optimization evaluation, select the top driver/vehicle candidate, and click **Assign & Simulate** to watch telemetry move live along the route corridors!
