@@ -195,3 +195,17 @@ Use this walkthrough script to demonstrate LogiRoute OS to the evaluation panel.
    * The engine automatically identifies the nearest available vehicle.
    * It calculates the TomTom route from the breakdown coordinate to the recipient and dispatches the replacement vehicle to complete the delivery.
 6. *Explain to the Panel:* "This demonstrates the autonomous routing capability. In case of real-world exceptions, the engine makes local TomTom queries to keep shipments moving without manual operator intervention."
+
+---
+
+## 8. Team Presentation Role Assignment (4 Presenters)
+
+To deliver a coordinated, professional defense of LogiRoute OS to the panel, divide the presentation roles and live demo tasks as follows:
+
+| Role & Presenter | Responsibilities | Live Demo Task |
+|---|---|---|
+| **Presenter 1: Project Lead & UI Host** | • Project introduction & problem statement.<br>• General architecture and high-level structure.<br>• System telemetry events. | • Opens `http://127.0.0.1:3000/`. <br>• Clicks **Demo Scenario** to initialize clean state.<br>• Opens settings modal, pastes TomTom API Key, and saves. |
+| **Presenter 2: Product & Safety Specialist** | • Order Dispatching lifecycle.<br>• **Hard Constraint Safety Filters** (battery charge checks, hazmat constraints, weight limits). | • Clicks **+ New Order** and creates an **Express** delivery order.<br>• Points out the Hard Rejected list (explaining why specific vehicles failed safety parameters). |
+| **Presenter 3: Algorithm & TomTom Specialist** | • **Multi-Criteria Score Heuristics** formula.<br>• TomTom routing query strategies (Fastest vs. Shortest, Eco).<br>• Waypoint coordinates sub-sampling. | • Reviews the Rank #1 vehicle scoring metrics and reasons checklist.<br>• Clicks **Confirm & Start Live Simulation** and explains how TomTom route curves map to Leaflet dynamically. |
+| **Presenter 4: Operations & Telemetry Specialist** | • Live movement simulation loop.<br>• Route conflict overlap detection.<br>• Dynamic incident handling (traffic congestion reroutes & breakdowns). | • Clicks **Inject Traffic Jam** (demonstrates live TomTom bypass rerouting).<br>• Clicks **Simulate Vehicle Breakdown** (demonstrates autonomous fleet swapping).<br>• Opens Analytics tab to summarize metrics improvements. |
+
